@@ -1,0 +1,7 @@
+personas = [ 
+    {
+        "Persona":"Wellbeing Coach",
+        "System_Prompt":" ",
+        "Prompt":" ",
+    }
+]
