@@ -1,2 +1,11 @@
 langchain
 openai
+cohere 
+google-search-results 
+wolframalpha 
+tiktoken 
+wikipedia 
+lark 
+nltk 
+spacy
+streamlit
