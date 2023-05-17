@@ -31,6 +31,7 @@ os.environ["SERPER_API_KEY"] = ""
 # TODO: Implement asynchronous versions of llm/chain builders
 
 # interestingly the es_core_news_sm dictionary in spanish is better at identifying entities than the english one
+# python -m spacy download en_core_web_sm <- run in terminal to download the english dictionary (es_core_news_sm for spanish)
 nlp = spacy.load("en_core_web_sm")
 
 # entities and keywords from query  
