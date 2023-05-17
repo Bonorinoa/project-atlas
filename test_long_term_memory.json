@@ -1,0 +1,115 @@
+{
+    "AI_profiles": [
+        {
+            "name":"Wellbeing Coach",
+            "agent_type":"zeroShot",
+            "personality":"friendly",
+            "knowledge":"wellbeing", 
+            "tools":["PERMA4"],
+            "description":"A friendly AI that helps you to improve your wellbeing based on the PERMA4 assessment.",
+            "max_tokens":200,
+            "temperature":0.7
+        },
+        {
+            "name":"Journalist",
+            "agent_type":"zeroShot",
+            "personality":"professional",
+            "knowledge":"journalism, science-backed wellbeing news, psychology research",
+            "tools":["google-serper", "news-api"],
+            "description":"A professional AI that helps you to find and summarise wellbeing news.",
+            "max_tokens":150,
+            "temperature":0.7
+        },
+        {
+            "name":"Recommendator Engine",
+            "agent_type":"selfAskSearch",
+            "personality":"professional, detailed, innovative, research-based",
+            "knowledge":"wellbeing, psychology, science-backed wellbeing news, psychology research",
+            "tools":["search-chat", "summarise", "suggest"],
+            "description":"A professional AI that generates recommendations of goals and activities for the user based on their wellbeing needs.",
+            "max_tokens":350,
+            "temperature":0.7
+        },
+        {
+            "name":"Digital Nudger",
+            "agent_type":"zeroShot",
+            "personality":"friendly, encouraging, patient, understanding, helpful.",
+            "knowledge":"coaching, wellbeing, digital nudging, behavioral economics, psychology.",
+            "tools":["google-serper"],
+            "description":"A caring coach/friendly that generates short messages to nudge the user int achieving their goals.",
+            "max_tokens":100,
+            "temperature":0.85  
+        },
+        {
+            "name":"Report Generator",
+            "agent_type":"zeroShot",
+            "personality":"professional, detailed",
+            "knowledge":"wellbeing, writing, assessment, psychology, economics", 
+            "tools":["wolfram-alpha"],
+            "description":"A friendly AI that, given PERMA+4 assessment responses, will generate a detailed report that evaluates the responder's state on each of the 9 dimensions of PERMA+4",
+            "max_tokens":200,
+            "temperature":0.7
+        }
+    ],
+
+    "user_profiles":[
+        {
+            "name":"Augusto GB",
+            "age":22,
+            "tastes":"music, economics, physics, sports, tennis, coding, travel.",
+            "date_joined":"2021-01-01",
+            "occupation":"student",
+            "location":"Claremont, CA",
+            "perma4_results":{
+                "positive_emotions": 0.8,
+                "engagement": 0.85,
+                "relationships": 0.7,
+                "meaning": 0.95,
+                "accomplishments": 0.85,
+                "physical_health": 0.86,
+                "economic_security": 0.7,
+                "mindset": 0.93,
+                "environment":0.75
+
+            }
+        },
+        {
+            "name":"Gym Brat",
+            "age":29,
+            "tastes":"weights, travel, concerts, reading, crafts, engineering.",
+            "date_joined":"2021-08-01",
+            "occupation":"engineer",
+            "location":"San Francisco, CA",
+            "perma4_results":{
+                "positive_emotions": 0.7,
+                "engagement": 0.75,
+                "relationships": 0.6,
+                "meaning": 0.85,
+                "accomplishments": 0.79,
+                "physical_health": 0.65,
+                "economic_security": 0.9,
+                "mindset": 0.90,
+                "environment":0.5
+            }
+        },
+        {
+            "name":"Granny",
+            "age":75,
+            "tastes":"gardening, cooking, reading, knitting, sewing, travel.",
+            "date_joined":"2022-05-01",
+            "occupation":"retired",
+            "location":"New York, NY",
+            "perma4_results":{
+                "positive_emotions": 0.76,
+                "engagement": 0.65,
+                "relationships": 0.85,
+                "meaning": 0.55,
+                "accomplishments": 0.79,
+                "physical_health": 0.45,
+                "economic_security": 0.85,
+                "mindset": 0.80,
+                "environment":0.75
+            }
+        }
+    ]
+}
