@@ -17,10 +17,8 @@ from langchain.retrievers import ContextualCompressionRetriever
 from langchain.retrievers.document_compressors import CohereRerank, LLMChainExtractor
 from langchain.utilities import GoogleSerperAPIWrapper
 
-os.environ["OPENAI_API_KEY"] = "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"
-os.environ["WOLFRAM_ALPHA_APPID"] = "42V6VG-3TEWJ62W3Y"
-os.environ["SERPER_API_KEY"] = "ef63b458e83c92aea9903b0b6ee7aae63872b5a7"
-os.environ["NEWS_API_KEY"] = "cc6ad9559d2b4f09b0535bb6c51cf0fa"
+# REMEMBER TO ADD YOUR API KEYS HERE
+
 # ----------
 
 # TODO: Fix build_chain function
@@ -46,6 +44,17 @@ def extract_entities_keywords(text):
     entities = [ent.text for ent in doc.ents]
     keywords = [token.lemma_ for token in doc if token.is_stop == False and token.is_punct == False]
     return entities, keywords
+
+def compute_cost(tokens, engine):
+    
+    model_prices = {"text-davinci-003": 0.02, 
+                    "gpt-3.5-turbo": 0.002, 
+                    "gpt-4": 0.03}
+    model_price = model_prices[engine]
+    
+    cost = (tokens / 1000) * model_price
+
+    return cost
 
 def build_llm(max_tokens=260, 
               temperature=0.6, 
@@ -126,7 +135,8 @@ def memory_to_pandas(memory_path: str):
     
     return data
     
-def run_agent_from_profile(agent_profile: dict, query: str):
+def run_agent_from_profile(agent_profile: dict, 
+                           query: str):
     '''
     Function to build agent from memory using lanchain library.
     params:
@@ -146,8 +156,13 @@ def run_agent_from_profile(agent_profile: dict, query: str):
     max_tokens = agent_profile['max_tokens']
     temperature = agent_profile['temperature']
     
-    engine = build_llm(max_tokens=max_tokens, temperature=temperature)
+    engine = build_llm(model_name='text-davinci-003', 
+                       max_tokens=max_tokens, temperature=temperature)
     llm_tools = load_tools(tools, llm=engine)
+    
+    prompt_template = '''You are {name}. {description}. You have a {personality} personality and {knowledge} knowledge.'''
+    prompt = PromptTemplate(input_variables=[name, description, query, personality, knowledge],
+                            template=prompt_template)
     
     if agent_type == "zeroShot":
         print(f"Building (zeroShot) {name} agent...")
@@ -157,9 +172,13 @@ def run_agent_from_profile(agent_profile: dict, query: str):
         # Build prompt before running to specify custom agent's prompt using its description, personality, and knowledge.
         ## 
         
-        zeroShot_agent.run(query)
+        zeroShot_chain = LLMChain(llm=engine,
+                                  prompt=prompt)
+                                  
+        agent_response = zeroShot_chain.run(query)
         
-        agent = zeroShot_agent
+        
+        #agent = zeroShot_agent
     
     elif agent_type == "selfAskSearch":
         print(f"Building (selfAskSearch) {name} agent...")
@@ -173,9 +192,8 @@ def run_agent_from_profile(agent_profile: dict, query: str):
                                  agent=AgentType.SELF_ASK_WITH_SEARCH, verbose=True)
         agent = sealfAsk_agent
     
-    return agent
+    return agent_response
 
-    
 
 def build_chain(prompt: PromptTemplate,
                 llm):
