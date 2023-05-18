@@ -17,17 +17,15 @@ from langchain.retrievers import ContextualCompressionRetriever
 from langchain.retrievers.document_compressors import CohereRerank, LLMChainExtractor
 from langchain.utilities import GoogleSerperAPIWrapper
 
-os.environ["OPENAI_API_KEY"] = ""
-os.environ["SERPAPI_API_KEY"] = ""
-os.environ["WOLFRAM_ALPHA_APPID"] = ""
-os.environ["SERPER_API_KEY"] = ""
+os.environ["OPENAI_API_KEY"] = "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"
+os.environ["WOLFRAM_ALPHA_APPID"] = "42V6VG-3TEWJ62W3Y"
+os.environ["SERPER_API_KEY"] = "ef63b458e83c92aea9903b0b6ee7aae63872b5a7"
+os.environ["NEWS_API_KEY"] = "cc6ad9559d2b4f09b0535bb6c51cf0fa"
 # ----------
 
 # TODO: Fix build_chain function
-# TODO: Write function to build agent from memory given agent's name
-# TODO: Write function to process perma4 responses
 # TODO: Write generic function to build custom langchain tools (i.e., summarise, suggest, search-chat)
-# TODO: Write functions to build, save and load information from memory
+# TODO: Write functions to save and load information from memory
 # TODO: Implement asynchronous versions of llm/chain builders
 
 # interestingly the es_core_news_sm dictionary in spanish is better at identifying entities than the english one
@@ -96,6 +94,88 @@ def build_llm_tools(tools: list,
         agent = initialize_agent(tools, llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True)
         
     return agent
+
+def read_perma4(path: str, return_test_answers=False):
+    '''
+    Function to read perma4 dataset.
+    params:
+        path: str to json file
+        return_test_answers: bool, default False
+    return:
+        data: pandas dataframe
+    '''
+    data = pd.read_json(path)
+    
+    questions = data['questions']
+    
+    if return_test_answers:
+        return data
+    else:
+        return questions
+    
+def memory_to_pandas(memory_path: str):
+    '''
+    Function to convert memory to pandas dataframe.
+    params:
+        memory_path: path to memory json file
+    return:
+        df: pandas dataframe
+    '''
+    with open(memory_path) as f:
+        data = json.load(f)    
+    
+    return data
+    
+def run_agent_from_profile(agent_profile: dict, query: str):
+    '''
+    Function to build agent from memory using lanchain library.
+    params:
+        agent_profile: dict
+        memory: pandas dataframe
+    return:
+        agent: Langchain agent object
+    '''
+    agent = None 
+    
+    name = agent_profile['name']
+    agent_type = agent_profile['agent_type']
+    personality = agent_profile['personality']
+    knowledge = agent_profile['knowledge']
+    tools = agent_profile['tools']
+    description = agent_profile['description']
+    max_tokens = agent_profile['max_tokens']
+    temperature = agent_profile['temperature']
+    
+    engine = build_llm(max_tokens=max_tokens, temperature=temperature)
+    llm_tools = load_tools(tools, llm=engine)
+    
+    if agent_type == "zeroShot":
+        print(f"Building (zeroShot) {name} agent...")
+        zeroShot_agent = initialize_agent(tools=llm_tools, llm=engine, 
+                                 agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True)
+        
+        # Build prompt before running to specify custom agent's prompt using its description, personality, and knowledge.
+        ## 
+        
+        zeroShot_agent.run(query)
+        
+        agent = zeroShot_agent
+    
+    elif agent_type == "selfAskSearch":
+        print(f"Building (selfAskSearch) {name} agent...")
+        search = GoogleSerperAPIWrapper()
+        # intermediate answer tool
+        self_tools = [Tool(name="Intermediate Answer",
+                        func=search.run,
+                        description="useful for when you need to ask with search")]
+        
+        sealfAsk_agent = initialize_agent(tools=self_tools, llm=engine, 
+                                 agent=AgentType.SELF_ASK_WITH_SEARCH, verbose=True)
+        agent = sealfAsk_agent
+    
+    return agent
+
+    
 
 def build_chain(prompt: PromptTemplate,
                 llm):
