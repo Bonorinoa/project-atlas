@@ -15,7 +15,7 @@
             "agent_type":"zeroShot",
             "personality":"professional",
             "knowledge":"journalism, science-backed wellbeing news, psychology research",
-            "tools":["google-serper", "news-api"],
+            "tools":["google-serper"],
             "description":"A professional AI that helps you to find and summarise wellbeing news.",
             "max_tokens":150,
             "temperature":0.7

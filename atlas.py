@@ -1,12 +1,11 @@
-from utils import (build_agent_from_memory, 
+from utils import (run_agent_from_profile, 
                    build_chain, extract_entities_keywords,
-                   build_llm, build_llm_tools)
+                   build_llm, build_llm_tools, memory_to_pandas)
 import streamlit as st
 import json
 from langchain.prompts import PromptTemplate
 
 # TODO: Fix build_chain function
-# TODO: Test building agents from memory
 # TODO: Test processing sample user profiles in memory with agents
 # TODO: Test digital nudging for simulated scenario
 # TODO: Write better prompts/descriptions (template for PromptTemplate, input_variables come from user profile or agent input or user input) for AI profiles in memory
@@ -55,3 +54,13 @@ def main():
     
 if __name__ == "__main__":
     main()
+    memory_path = "test_long_term_memory.json"
+    memory_df = memory_to_pandas(memory_path)
+    print(memory_df)
+    
+    journalist_profile = memory_df['AI_profiles'][1]
+    journalist_agent = run_agent_from_profile(journalist_profile, query="What is the best way to get a job?")
+    print(journalist_agent)
+    
+    digital_nudger_profile = memory_df['AI_profiles'][3]
+    digital_nudger_agent = run_agent_from_profile(digital_nudger_profile, query="")
