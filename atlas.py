@@ -1,6 +1,6 @@
 from utils import (run_agent_from_profile, build_report,
                    extract_entities_keywords, generate_goals,
-                   build_llm, build_llm_tools, 
+                   build_llm, build_llm_tools, suggest_activities,
                    memory_to_pandas)
 import streamlit as st
 import json
@@ -8,11 +8,10 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 import time
 
-# TODO: Fix build_chain function
 # TODO: Test processing sample user profiles in memory with agents
 # TODO: Test digital nudging for simulated scenario
 # TODO: Write better prompts/descriptions (template for PromptTemplate, input_variables come from user profile or agent input or user input) for AI profiles in memory
-# TODO: Code demo
+# TODO: Code demo (a bit better)
 
 # load memory globally
 memory_path = "test_long_term_memory.json"
@@ -38,7 +37,6 @@ nudger = memory_df["AI_profiles"][3]
 # 5. Report Generator
 report_gen = memory_df["AI_profiles"][4]
 
- 
 
 def run_demo():
     st.title("Atlas Intelligence Demo")
@@ -54,7 +52,7 @@ def run_demo():
     if name and age and tastes and occupation and location:
         # list of inputs to string
         user_data = str([name, age, tastes, occupation, location])
-        if st.button("Get Report and Goals"):
+        if st.button("Get Report, Goals, and Activities"):
             
             st.spinner("Generating report")
             # build report with report agent and demo perma4 results [working function]
@@ -72,6 +70,16 @@ def run_demo():
                             report=report)
             st.write("---- DEMO GOALS ----")
             st.write(goals)
+            
+            st.spinner("Generating activities")
+            time.sleep(2)
+            
+            # suggest activities using goals and user profile
+            activities = suggest_activities(coach_profile=coach,
+                                            user_data=user_data,
+                                            goals=goals)
+            st.write("---- DEMO ACTIVITIES ----")
+            st.write(activities)
             
     else:
         st.warning("Please fill in the user profile information on the left sidebar before generating goals.")

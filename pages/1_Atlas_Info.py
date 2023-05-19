@@ -15,3 +15,6 @@ def main():
     
     st.subheader("Atlas Vision")
     st.write("Vision")
+
+if __name__ == "__main__":
+    main()

@@ -4,8 +4,9 @@
             "name":"Wellbeing Coach",
             "agent_type":"zeroShot",
             "personality":"friendly",
-            "knowledge":"wellbeing", 
-            "tools":["PERMA4"],
+            "knowledge":"wellbeing, coaching, psychology, science-backed wellbeing news, psychology research", 
+            "tools":["Intermediate Answer"],
+            "keywords":"[wellbeing assessment, wellbeing coaching]",
             "description":"A friendly AI that helps you to improve your wellbeing based on the PERMA4 assessment.",
             "max_tokens":200,
             "temperature":0.7

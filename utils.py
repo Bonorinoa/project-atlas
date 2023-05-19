@@ -18,7 +18,7 @@ from langchain.retrievers.document_compressors import CohereRerank, LLMChainExtr
 from langchain.utilities import GoogleSerperAPIWrapper
 
 # REMEMBER TO ADD YOUR API KEYS HERE
-
+os.environ["SERPER_API_KEY"] = "ef63b458e83c92aea9903b0b6ee7aae63872b5a7"
 # ----------
 
 # TODO: Fix build_chain function
@@ -256,6 +256,51 @@ def generate_goals(recommender_generator_profile: dict,
                     "personality": personality})
     
     return goals
+
+def suggest_activities(coach_profile: dict,
+                       user_data: list,
+                       goals: str):
+    '''
+    Function to initialize and run coach given the AI profile and user data.
+    params:
+        coach_profile: dict
+        user_data: list
+    return:
+        activities: str
+    '''
+    name = coach_profile['name']
+    agent_type = coach_profile['agent_type']
+    personality = coach_profile['personality']
+    knowledge = coach_profile['knowledge']
+    tools = coach_profile['tools']
+    keywords = coach_profile['keywords']
+    description = coach_profile['description']
+    max_tokens = coach_profile['max_tokens']
+    temperature = coach_profile['temperature']
+    
+    sys_prompt_template = f'''You are {name}, an expert in [{knowledge}]. {description}.'''
+    task_prompt_template = f'''Given the following user data {user_data} and suggested goals {goals}.
+    Recommend two or three activities per goal that will help the surveyed object to achieve the suggested goals.
+    You have access to google-serper to research recent wellbeing news, wellbeing assessment research, and wellbeing activities. Use the following keywords to optimize your search: {keywords}.
+    Be {personality}. ACTIVITIES: 
+    '''
+    
+    search = GoogleSerperAPIWrapper()
+    tools = [(Tool(name='Intermediate Answer',
+                  func=search.run,
+                  description="useful for when you need to ask with search"))]
+    
+    prompt_template = sys_prompt_template + task_prompt_template
+    
+    engine = build_llm(max_tokens=max_tokens, temperature=temperature)
+    coach_agent = initialize_agent(tools,
+                                   engine,
+                                   agent=AgentType.SELF_ASK_WITH_SEARCH,
+                                   verbose=False)
+    
+    activities = coach_agent.run(prompt_template)
+    
+    return activities
 
 # ignore this function, is still on development. Not sure if it will be useful or not.
 def run_agent_from_profile(agent_profile: dict, 
