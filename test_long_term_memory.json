@@ -4,12 +4,12 @@
             "name":"Wellbeing Coach",
             "agent_type":"zeroShot",
             "personality":"friendly",
-            "knowledge":"wellbeing, coaching, psychology, science-backed wellbeing news, psychology research", 
+            "knowledge":"wellbeing, coaching, psychology, science-backed wellbeing research, psychology research", 
             "tools":["Intermediate Answer"],
             "keywords":"[wellbeing assessment, wellbeing coaching]",
             "description":"A friendly AI that helps you to improve your wellbeing based on the PERMA4 assessment.",
-            "max_tokens":200,
-            "temperature":0.7
+            "max_tokens":350,
+            "temperature":0.6
         },
         {
             "name":"Journalist",
@@ -30,7 +30,7 @@
             "keywords":"[]",
             "description":"A professional AI that generates recommendations of goals for the user based on their wellbeing needs.",
             "max_tokens":350,
-            "temperature":0.7
+            "temperature":0.75
         },
         {
             "name":"Digital Nudger",
@@ -46,12 +46,12 @@
             "name":"Report Generator",
             "agent_type":"zeroShot",
             "personality":"professional, detailed",
-            "knowledge":"wellbeing, writing, assessment, psychology, economics", 
+            "knowledge":"writing, assessment, psychology", 
             "tools":["wolfram-alpha"],
             "keywords": "[well-being, happiness, sadness, anger, fear, disgust, surprise, trust, anticipation, joy, sadness, love, hate, contentment, satisfaction, gratitude, compassion, empathy, kindness, generosity, sympathy, guilt, shame, pride, embarrassment, regret, hope, optimism, pessimism, confidence, self-esteem, self-worth, self-respect, self-confidence, self-consciousness, self-awarenes]",
             "description":"A friendly AI with access to wolfram-alpha for advanced reasoning that, given PERMA+4 assessment responses, will generate a detailed report that evaluates the responder's state on each of the 9 dimensions of PERMA+4.",
             "max_tokens":1500,
-            "temperature":0.7
+            "temperature":0.6
         }
     ],
 

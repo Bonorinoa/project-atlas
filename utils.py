@@ -16,9 +16,12 @@ from langchain.chains import LLMChain
 from langchain.retrievers import ContextualCompressionRetriever
 from langchain.retrievers.document_compressors import CohereRerank, LLMChainExtractor
 from langchain.utilities import GoogleSerperAPIWrapper
+from langchain.schema import OutputParserException
 
 # REMEMBER TO ADD YOUR API KEYS HERE
+# os.environ["OPENAI_API_KEY"] = ""
 os.environ["SERPER_API_KEY"] = "ef63b458e83c92aea9903b0b6ee7aae63872b5a7"
+os.environ["WOLFRAM_ALPHA_APPID"] = "42V6VG-3TEWJ62W3Y"
 # ----------
 
 # TODO: Fix build_chain function
@@ -179,12 +182,12 @@ def build_report(report_generator_profile: dict,
     
     report_structure = "1. Positive Emotions \n 2. Engagement \n 3. Relationships \n 4. Meaning \n 5. Accomplishment \n 6. Physical Health \n 7. Mindset \n 8. Work Environment \n 9. Economic Security"
  
-    sys_prompt_template = '''You are {name}, an expert in [{knowledge}]. {description}. You can use the following keywords to help you: {keywords} '''
-    task_prompt_template = '''Given the following questions {questions} and responses {demo_answers}. 
-    
-    Provide a well being assessment of the surveyed object based on the 9 pillars of Perma+4 framework pillars. 
-    Be {personality}. The output must be a report that associates the responses to the questions with the 9 pillars of Perma+4 framework. 
+    sys_prompt_template = '''You are {name}, an expert in [{knowledge}] with {personality} personality. {description}. You can use the following keywords to help you: {keywords} '''
+    task_prompt_template = '''Use the following questions {questions} and responses {demo_answers} Provide a well being assessment of the surveyed object based on the 9 pillars of Perma+4 framework.
+    The output must be a structured and conciser report that associates the responses to the questions with the 9 pillars of Perma+4 framework. 
     Here is an example of the desired structure {report_structure}. REPORT: 
+    
+    1. Positive Emotions:
     '''
     prompt_template = sys_prompt_template + task_prompt_template
     
@@ -230,13 +233,12 @@ def generate_goals(recommender_generator_profile: dict,
     max_tokens = recommender_generator_profile['max_tokens']
     temperature = recommender_generator_profile['temperature']
     
-    sys_prompt_template = '''You are {name}, an expert in [{knowledge}]. {description}.'''
-    task_prompt_template = '''Given the following user data {user_data} 
-    and insights {report} from the PERMA+4 framework. 
-    provide three suggested goals for the surveyed object that 
-    will maximize his net benefit for the effort required to improve 
-    along the dimensions that need the most improvement. 
-    Be {personality}. GOALS: '''
+    sys_prompt_template = '''You are {name}, an expert in [{knowledge}] with {personality} personality. {description}.'''
+    task_prompt_template = '''Use the following user data {user_data} and insights {report} to provide three suggested goals 
+    for the surveyed object that will maximize his net benefit for the effort required to improve along the dimensions that need the most improvement. 
+    GOALS: 
+    
+    '''
     
     prompt_template = sys_prompt_template + task_prompt_template
     
@@ -278,28 +280,36 @@ def suggest_activities(coach_profile: dict,
     max_tokens = coach_profile['max_tokens']
     temperature = coach_profile['temperature']
     
-    sys_prompt_template = f'''You are {name}, an expert in [{knowledge}]. {description}.'''
+    sys_prompt_template = f'''You are {name}, an expert in [{knowledge}] with a {personality} personality. {description}.'''
     task_prompt_template = f'''Given the following user data {user_data} and suggested goals {goals}.
-    Recommend two or three activities per goal that will help the surveyed object to achieve the suggested goals.
-    You have access to google-serper to research recent wellbeing news, wellbeing assessment research, and wellbeing activities. Use the following keywords to optimize your search: {keywords}.
-    Be {personality}. ACTIVITIES: 
+    Recommend two activities per goal that will help the surveyed object achieve or move towards the suggested goals.
+    
+    Prioritize the tools as follows: 
+    1. google-serper to research relevant wellbeing activities that can be recommended to this user. 
+    You can use the following keywords to optimize your search: {keywords}.
+    
+    Write the suggested activities in bullet point format for each goal in a clear and structured format. ACTIVITIES: 
+      
     '''
     
-    search = GoogleSerperAPIWrapper()
-    tools = [(Tool(name='Intermediate Answer',
-                  func=search.run,
-                  description="useful for when you need to ask with search"))]
+    #search = GoogleSerperAPIWrapper()
+    #tools = [(Tool(name='Intermediate Answer',
+    #              func=search.run,
+    #              description="useful for when you need to ask with search"))]
+    
+    tools = load_tools(['google-serper', 'wolfram-alpha'])
     
     prompt_template = sys_prompt_template + task_prompt_template
     
     engine = build_llm(max_tokens=max_tokens, temperature=temperature)
     coach_agent = initialize_agent(tools,
                                    engine,
-                                   agent=AgentType.SELF_ASK_WITH_SEARCH,
-                                   verbose=False)
-    
-    activities = coach_agent.run(prompt_template)
-    
+                                   agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+                                   verbose=True)
+    try:
+        activities = coach_agent.run(prompt_template)
+    except OutputParserException as e:
+        activities='1.'+str(e).split('1.')[1]
     return activities
 
 # ignore this function, is still on development. Not sure if it will be useful or not.
@@ -362,16 +372,3 @@ def run_agent_from_profile(agent_profile: dict,
     
     return agent_response
 
-
-def build_agent_from_memory(ai_profile):
-    '''
-    Function to build agent from memory using lanchain library.
-    params:
-        ai_profile: dict
-    return:
-        agent: Langchain agent object
-    '''
-    agent = None
-    
-    
-    return agent
