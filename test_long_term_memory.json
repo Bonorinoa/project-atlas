@@ -25,8 +25,9 @@
             "agent_type":"selfAskSearch",
             "personality":"professional, detailed, innovative, research-based",
             "knowledge":"wellbeing, psychology, science-backed wellbeing news, psychology research",
-            "tools":["search-chat", "summarise", "suggest"],
-            "description":"A professional AI that generates recommendations of goals and activities for the user based on their wellbeing needs.",
+            "tools":["Intermediate_Answer"],
+            "keywords":"[]",
+            "description":"A professional AI that generates recommendations of goals for the user based on their wellbeing needs.",
             "max_tokens":350,
             "temperature":0.7
         },
@@ -47,8 +48,8 @@
             "knowledge":"wellbeing, writing, assessment, psychology, economics", 
             "tools":["wolfram-alpha"],
             "keywords": "[well-being, happiness, sadness, anger, fear, disgust, surprise, trust, anticipation, joy, sadness, love, hate, contentment, satisfaction, gratitude, compassion, empathy, kindness, generosity, sympathy, guilt, shame, pride, embarrassment, regret, hope, optimism, pessimism, confidence, self-esteem, self-worth, self-respect, self-confidence, self-consciousness, self-awarenes]",
-            "description":"A friendly AI that, given PERMA+4 assessment responses, will generate a detailed report that evaluates the responder's state on each of the 9 dimensions of PERMA+4.",
-            "max_tokens":600,
+            "description":"A friendly AI with access to wolfram-alpha for advanced reasoning that, given PERMA+4 assessment responses, will generate a detailed report that evaluates the responder's state on each of the 9 dimensions of PERMA+4.",
+            "max_tokens":1500,
             "temperature":0.7
         }
     ],

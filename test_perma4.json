@@ -51,7 +51,7 @@
                 "How do you feel about your current financial status?",
                 "Do you typically worry about money?"
                 ],
-    "test_answers":["22-30",
+    "demo_answers":["22-30",
                     "Working on things I love, engaging in interesting debates and conversations, communicating with friends. Giving back to people in need",
                     "Being busy with work, not having time to communicate with friends and family.",
                     "Joy, amusement, gratitude",

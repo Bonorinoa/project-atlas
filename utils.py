@@ -56,8 +56,27 @@ def compute_cost(tokens, engine):
 
     return cost
 
-def build_llm(max_tokens=260, 
-              temperature=0.6, 
+def build_coach_llm(max_tokens=560,
+                    temperature=0.7,
+                    provider="openai"):
+    
+    '''
+    Function to build main LLM personality model for Atlas Coach using Langchain.
+    This LLM is meant to take in the user query, determine which agent(s) to use, wait for the agent(s) to return a response, and then use the response as context to answer the query.
+    params:
+        max_tokens: int, default 560
+        temperature: float, default 0.7
+        provider: str, default 'openai'
+    return:
+        llm: Langchain llm object
+    '''
+    gpt3_coach = OpenAI(model_name='text-davinci-003', 
+                        temperature=temperature, max_tokens=max_tokens)
+    
+    prompt_template_coach = '''{something} and something else'''
+
+def build_llm(max_tokens: int, 
+              temperature: int, 
               provider="openai"):
     '''
     Function to build a LLM model using lanchain library. 
@@ -134,7 +153,111 @@ def memory_to_pandas(memory_path: str):
         data = json.load(f)    
     
     return data
+
+def build_report(report_generator_profile: dict,
+                 perma_results: list):
+    '''
+    Function to initialize and run report generator given the AI profile and perma4 results.
+    params:
+        report_generator_profile: dict
+        perma_results: list
+    return:
+        report: str
+    '''
+    questions = perma_results['questions']
+    demo_answers = perma_results['demo_answers']
     
+    name = report_generator_profile['name']
+    agent_type = report_generator_profile['agent_type']
+    personality = report_generator_profile['personality']
+    knowledge = report_generator_profile['knowledge']
+    tools = report_generator_profile['tools']
+    keywords = report_generator_profile['keywords']
+    description = report_generator_profile['description']
+    max_tokens = report_generator_profile['max_tokens']
+    temperature = report_generator_profile['temperature']
+    
+    report_structure = "1. Positive Emotions \n 2. Engagement \n 3. Relationships \n 4. Meaning \n 5. Accomplishment \n 6. Physical Health \n 7. Mindset \n 8. Work Environment \n 9. Economic Security"
+ 
+    sys_prompt_template = '''You are {name}, an expert in [{knowledge}]. {description}. You can use the following keywords to help you: {keywords} '''
+    task_prompt_template = '''Given the following questions {questions} and responses {demo_answers}. 
+    
+    Provide a well being assessment of the surveyed object based on the 9 pillars of Perma+4 framework pillars. 
+    Be {personality}. The output must be a report that associates the responses to the questions with the 9 pillars of Perma+4 framework. 
+    Here is an example of the desired structure {report_structure}. REPORT: 
+    '''
+    prompt_template = sys_prompt_template + task_prompt_template
+    
+    prompt = PromptTemplate(input_variables=[
+                            "name", "knowledge", "description", "keywords", 
+                            "questions", "demo_answers", "personality", "report_structure"
+                            ],
+                            template=prompt_template)
+    
+    # default of build_llm is text-davinci-003
+    engine = build_llm(max_tokens=max_tokens, temperature=temperature)
+    
+    chain = LLMChain(llm=engine, prompt=prompt)
+    report = chain.run({'name': name,
+                          'knowledge': knowledge,
+                          'description': description,
+                          'keywords': keywords,
+                          'questions': questions,
+                          'demo_answers': demo_answers,
+                          'personality': personality,
+                          'report_structure': report_structure})
+    
+    return report
+    
+def generate_goals(recommender_generator_profile: dict,
+                   user_data: list,
+                   report: str):
+    '''
+    Function to initialize and run recommender generator given the AI profile and user data.
+    params:
+        recommender_generator_profile: dict
+        user_data: list
+    return:
+        goals: str
+    '''
+    name = recommender_generator_profile['name']
+    agent_type = recommender_generator_profile['agent_type']
+    personality = recommender_generator_profile['personality']
+    knowledge = recommender_generator_profile['knowledge']
+    tools = recommender_generator_profile['tools']
+    keywords = recommender_generator_profile['keywords']
+    description = recommender_generator_profile['description']
+    max_tokens = recommender_generator_profile['max_tokens']
+    temperature = recommender_generator_profile['temperature']
+    
+    sys_prompt_template = '''You are {name}, an expert in [{knowledge}]. {description}.'''
+    task_prompt_template = '''Given the following user data {user_data} 
+    and insights {report} from the PERMA+4 framework. 
+    provide three suggested goals for the surveyed object that 
+    will maximize his net benefit for the effort required to improve 
+    along the dimensions that need the most improvement. 
+    Be {personality}. GOALS: '''
+    
+    prompt_template = sys_prompt_template + task_prompt_template
+    
+    prompt = PromptTemplate(input_variables=["name", "knowledge", "description", 
+                                             "user_data", "report", "personality"],
+                            template=prompt_template)
+    
+    engine = build_llm(max_tokens=max_tokens, temperature=temperature)
+    
+    chain = LLMChain(llm=engine, prompt=prompt)
+    
+    goals = chain.run({'name': name,
+                    'knowledge': knowledge,
+                    'description': description,
+                    'user_data': user_data,
+                    'report': report,
+                    "personality": personality})
+    
+    return goals
+
+# ignore this function, is still on development. Not sure if it will be useful or not.
 def run_agent_from_profile(agent_profile: dict, 
                            query: str):
     '''
@@ -195,21 +318,6 @@ def run_agent_from_profile(agent_profile: dict,
     return agent_response
 
 
-def build_chain(prompt: PromptTemplate,
-                llm):
-    '''
-    Function to build LLMChain using lanchain library.
-    params:
-        prompt: str
-        llm: Langchain llm object
-    return:
-        chain: Langchain LLMChain object
-    '''
-    chain = LLMChain(llm=llm, 
-                     prompt=prompt)
-    
-    return chain
-
 def build_agent_from_memory(ai_profile):
     '''
     Function to build agent from memory using lanchain library.
@@ -219,7 +327,6 @@ def build_agent_from_memory(ai_profile):
         agent: Langchain agent object
     '''
     agent = None
-    
     
     
     return agent
